@@ -1,0 +1,112 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://e-cdns-files.dzcdn.net/js/min/dz-v00401013.js" defer="true"></script>
+    <style>
+        .getintersection {
+            background: #DC143C;
+            border: solid 0px;
+            padding:5px;
+            color:#fff;
+            border-radius: 5px;
+            display: block;
+            font-size: medium;
+            font-weight: bold;
+        }
+        .addUser {
+            background: #00FF7F;
+            border: solid 0px;
+            padding:5px;
+            color:#fff;
+            border-radius: 5px;
+            display: block;
+            font-size: medium;
+            font-weight: bold;
+        }
+        .users {
+            border: double #ccc 6px;
+            border-radius: 10px;
+            color: #000000;
+            background: #E6E6FA;
+            padding: 15px;
+            text-align: center;
+            margin: 5px auto 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <div id="dz-root"></div>
+    <button id="intersection" class="getintersection" style="margin: 0 auto 0 auto">Get Common Tracks</button>
+    <button id="adduser" onclick="AddUser()" class="addUser" style="margin: 5px auto 0 auto">Add user</button>
+    <div id='users' class="users">No users</div>
+    <div id='divintersection' class="users">lol</div>
+    <script>
+        var userstracks = []
+        $(document).ready(function(){
+            $("#controlers input").attr('disabled', true);
+            $("#slider_seek").click(function(evt,arg){
+                var left = evt.offsetX;
+            });
+        });
+        document.addEventListener('DOMContentLoaded', function() {
+            DZ.init({
+                appId  : '8',
+                channelUrl : 'https://developers.deezer.com/examples/channel.php',
+            });
+        });
+            function AddUser() {
+                var user_id = prompt('Укажите ID вашего Deezer аккаунта:')
+                if ($.isNumeric(user_id) == false) {
+                    return false
+                }
+                DZ.api('/user/' + user_id + '/tracks', function(response){
+                    var tracks = response.data
+                    var trackslist = []
+	                for (i = 0; i <= tracks.length-1; i++) {
+                        datatrack = tracks[i]
+                        track = datatrack.title
+                        trackslist.push(track)
+                    }
+                    userstracks.push(trackslist)
+                })
+                NameOfUser(user_id)
+            }
+            function NameOfUser(user_id) {
+                DZ.api('/user/' + user_id, function(response){
+                    username = response.name
+                    users = document.getElementById('users').innerHTML
+                    if (users == 'No users') {
+                        document.getElementById('users').innerHTML = username + '(id:' + user_id + ')' 
+                    }
+                    else {
+                        document.getElementById('users').innerHTML = users + '<br>' + username + '(id:' + user_id + ')' 
+                    }
+                })
+            }
+            function FindIntersection() {
+                var intersec1array = userstracks[0]
+                var intersec2array = userstracks[1]
+                var intersection = intersec1array.filter(x => intersec2array.includes(x));
+                console.log(userstracks)
+                console.log(intersection)
+                for (i=0;i<userstracks.length;i++) {
+                    var array1 = userstracks[i]
+                    var array2 = intersection
+                    intersection = array1.filter(value => -1 !== array2.indexOf(value));
+                    console.log(intersection)
+                }
+                document.getElementById('divintersection').innerHTML = intersection
+            };
+            // var ik = '3376973244'
+            // AddUser(ik)
+            // var ik = '663039741'
+            // AddUser(ik)
+            // var ik = '3381385144'
+            // AddUser(ik)
+            document.getElementById('intersection').onclick = FindIntersection;
+            document.getElementById('adduser').onclick = AddUser;
+    </script>
+</body>
+<br/>
+</html>
